@@ -1,0 +1,110 @@
+﻿using System;
+using System.Linq;
+using TShockAPI;
+using Terraria;
+using TerrariaApi.Server;
+using Rests;
+using System.ComponentModel;
+using HttpServer;
+
+namespace PlayerReader
+{
+    [ApiVersion(2, 1)]
+    public class PlayerReader : TerrariaPlugin
+    {
+        public override string Author => "Quinci";
+
+        public override string Description => "Adds a rest endpoint for more player data.";
+
+        public override string Name => "Player Rest";
+
+        public override Version Version => new Version(1, 0, 0, 0);
+
+        public PlayerReader(Main game) : base(game)
+        {
+
+        }
+
+        public override void Initialize()
+        {
+            ServerApi.Hooks.GameInitialize.Register(this, OnInit);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                ServerApi.Hooks.GameInitialize.Deregister(this, OnInit);
+            }
+            base.Dispose(disposing);
+        }
+        private void OnInit(EventArgs e)
+        {
+            TShock.RestApi.RegisterRedirect("/readplayers", "/readplayers");
+            TShock.RestApi.Register(new SecureRestCommand("/readplayers", PlayerRead, RestPermissions.restuserinfo));
+        }
+
+        private object PlayerFind(IParameterCollection parameters)
+        {
+            string name = parameters["player"];
+            if (string.IsNullOrWhiteSpace(name))
+                return new RestObject("400") { Error = "Missing or empty 'player' parameter" };
+
+            var found = TSPlayer.FindByNameOrID(name);
+            switch (found.Count)
+            {
+                case 1:
+                    return found[0];
+                case 0:
+                    return new RestObject("400") { Error = "Player " + name + " was not found" };
+                default:
+                    return new RestObject("400") { Error = "Player " + name + " matches " + found.Count + " players" };
+            }
+        }
+
+        [Description("Get information for a user.")]
+        [Route("/readplayers")]
+        [Permission(RestPermissions.restuserinfo)]
+        [Noun("player", true, "The player to lookup", typeof(String))]
+        [Token]
+        private object PlayerRead (RestRequestArgs args)
+        {
+            var ret = PlayerFind(args.Parameters);
+            if (ret is RestObject)
+            {
+                return ret;
+            }
+
+            TSPlayer player = (TSPlayer)ret;
+            
+
+            object items = new
+            {
+                inventory = player.TPlayer.inventory.Where(i => i.active).Select(item => (NetItem)item),
+                equipment = player.TPlayer.armor.Where(i => i.active).Select(item => (NetItem)item),
+                dyes = player.TPlayer.dye.Where(i => i.active).Select(item => (NetItem)item),
+                piggy = player.TPlayer.bank.item.Where(i => i.active).Select(item => (NetItem)item),
+                safe = player.TPlayer.bank2.item.Where(i => i.active).Select(item => (NetItem)item),
+                forge = player.TPlayer.bank3.item.Where(i => i.active).Select(item => (NetItem)item),
+                vault = player.TPlayer.bank4.item.Where(i => i.active).Select(item => (NetItem)item),
+                miscEquip = player.TPlayer.miscEquips.Where(i => i.active).Select(item => (NetItem)item),
+                miscDye = player.TPlayer.miscDyes.Where(i => i.active).Select(item => (NetItem)item),
+                trash = (NetItem)player.TPlayer.trashItem
+            };
+
+            return new RestObject
+            {
+                {"nickname", player.Name},
+                {"username", player.Account?.Name},
+                {"ip", player.IP},
+                {"group", player.Group.Name},
+                {"registered", player.Account?.Registered},
+                {"muted", player.mute },
+                {"position", player.TileX + "," + player.TileY},
+                //{"selected item", player.TPlayer.selectedItem },
+                {"items", items},
+                {"buffs", string.Join(", ", player.TPlayer.buffType)}
+            };
+        }
+    }
+}
