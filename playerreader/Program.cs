@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Data;
+using System.Collections.Generic;
 using System.Linq;
 using TShockAPI;
 using Terraria;
@@ -6,6 +8,8 @@ using TerrariaApi.Server;
 using Rests;
 using System.ComponentModel;
 using HttpServer;
+using TShockAPI.DB;
+using MySql;
 
 namespace PlayerReader
 {
@@ -43,7 +47,6 @@ namespace PlayerReader
             TShock.RestApi.RegisterRedirect("/readplayers", "/readplayers");
             TShock.RestApi.Register(new SecureRestCommand("/readplayers", PlayerRead, RestPermissions.restuserinfo));
         }
-
         private object PlayerFind(IParameterCollection parameters)
         {
             string name = parameters["player"];
@@ -51,15 +54,19 @@ namespace PlayerReader
                 return new RestObject("400") { Error = "Missing or empty 'player' parameter" };
 
             var found = TSPlayer.FindByNameOrID(name);
-            switch (found.Count)
+            if (found.Count == 1)
             {
-                case 1:
-                    return found[0];
-                case 0:
-                    return new RestObject("400") { Error = "Player " + name + " was not found" };
-                default:
-                    return new RestObject("400") { Error = "Player " + name + " matches " + found.Count + " players" };
+                return found[0];
             }
+            else if(found.Count == 0)
+            {
+                return new RestObject("400") { Error = "Player " + name + " not online." };
+            }
+            else
+            {
+                return new RestObject("400") { Error = "Player " + name + " matches " + found.Count + " players" };
+            }
+
         }
 
         [Description("Get information for a user.")]
@@ -83,17 +90,18 @@ namespace PlayerReader
                 inventory = player.TPlayer.inventory.Where(i => i.active).Select(item => (NetItem)item),
                 equipment = player.TPlayer.armor.Where(i => i.active).Select(item => (NetItem)item),
                 dyes = player.TPlayer.dye.Where(i => i.active).Select(item => (NetItem)item),
-                piggy = player.TPlayer.bank.item.Where(i => i.active).Select(item => (NetItem)item),
-                safe = player.TPlayer.bank2.item.Where(i => i.active).Select(item => (NetItem)item),
-                forge = player.TPlayer.bank3.item.Where(i => i.active).Select(item => (NetItem)item),
-                vault = player.TPlayer.bank4.item.Where(i => i.active).Select(item => (NetItem)item),
                 miscEquip = player.TPlayer.miscEquips.Where(i => i.active).Select(item => (NetItem)item),
                 miscDye = player.TPlayer.miscDyes.Where(i => i.active).Select(item => (NetItem)item),
-                trash = (NetItem)player.TPlayer.trashItem
+                piggy = player.TPlayer.bank.item.Where(i => i.active).Select(item => (NetItem)item),
+                safe = player.TPlayer.bank2.item.Where(i => i.active).Select(item => (NetItem)item),
+                trash = (NetItem)player.TPlayer.trashItem,
+                forge = player.TPlayer.bank3.item.Where(i => i.active).Select(item => (NetItem)item),
+                vault = player.TPlayer.bank4.item.Where(i => i.active).Select(item => (NetItem)item),
             };
 
             return new RestObject
             {
+                { "online" , "true"},
                 {"nickname", player.Name},
                 {"username", player.Account?.Name},
                 {"ip", player.IP},
@@ -101,7 +109,6 @@ namespace PlayerReader
                 {"registered", player.Account?.Registered},
                 {"muted", player.mute },
                 {"position", player.TileX + "," + player.TileY},
-                //{"selected item", player.TPlayer.selectedItem },
                 {"items", items},
                 {"buffs", string.Join(", ", player.TPlayer.buffType)}
             };
