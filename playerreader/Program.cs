@@ -58,7 +58,7 @@ namespace PlayerReader
             {
                 return found[0];
             }
-            else if(found.Count == 0)
+            else if (found.Count == 0)
             {
                 
                 UserAccount account = TShock.UserAccounts.GetUserAccountByName(name);
@@ -67,7 +67,7 @@ namespace PlayerReader
                     try
                     {
 
-                        using (var reader = TShock.DB.QueryReader("SELECT * FROM tsCharacter WHERE Account=@0", account.ID))
+                        using (var reader = TShock.DB.QueryReader("SELECT * FROM sscinventory WHERE Account=@0", account.ID))
                             if (reader.Read())
                             {
 
@@ -91,7 +91,6 @@ namespace PlayerReader
                             {
                                 return new RestObject("400") { Error = "DB could not be read." };
                             }
-                        //}
                     }
 
                     catch (Exception ex)
@@ -144,7 +143,7 @@ namespace PlayerReader
 
             return new RestObject
             {
-                { "online" , "true"},
+                {"online" , "true"},
                 {"nickname", player.Name},
                 {"username", player.Account?.Name},
                 {"ip", player.IP},
