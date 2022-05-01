@@ -29,19 +29,19 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="OTAPI">
-      <HintPath>References\OTAPI.dll</HintPath>
+      <HintPath>..\..\TShockReferences\OTAPI.dll</HintPath>
     </Reference>
     <Reference Include="TerrariaServer">
-      <HintPath>References\TerrariaServer.exe</HintPath>
+      <HintPath>..\..\TShockReferences\TerrariaServer.exe</HintPath>
     </Reference>
     <Reference Include="TShockAPI">
-      <HintPath>References\TShockAPI.dll</HintPath>
+      <HintPath>..\..\TShockReferences\TShockAPI.dll</HintPath>
     </Reference>
     <Reference Include="HttpServer">
-      <HintPath>References\HttpServer.dll</HintPath>
+      <HintPath>..\..\TShockReferences\HttpServer.dll</HintPath>
     </Reference>
     <Reference Include="MySql.Data">
-      <HintPath>References\MySql.Data.dll</HintPath>
+      <HintPath>..\..\TShockReferences\MySql.Data.dll</HintPath>
     </Reference>
     <Reference Include="System.Data" />
   </ItemGroup>
