@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data;
 using System.Collections.Generic;
 using System.Linq;
 using TShockAPI;
@@ -9,7 +8,6 @@ using Rests;
 using System.ComponentModel;
 using HttpServer;
 using TShockAPI.DB;
-using MySql;
 
 namespace PlayerReader
 {
@@ -53,7 +51,10 @@ namespace PlayerReader
             string name = parameters["player"];
             if (string.IsNullOrWhiteSpace(name))
             {
-                return new RestObject("400") { Error = "Missing or empty 'player' parameter" };
+                return new RestObject("400")
+                {
+                    Error = "Missing or empty 'player' parameter"
+                };
             }
 
             var found = TSPlayer.FindByNameOrID(name);
@@ -102,12 +103,18 @@ namespace PlayerReader
                 }
                 else
                 {
-                    return new RestObject("400") { Error = "Player " + name + " was not found online or saved offline." };
+                    return new RestObject("400")
+                    {
+                        Error = $"Player {name} was not found online or saved offline."
+                    };
                 }
             }
             else
             {
-                return new RestObject("400") { Error = "Player " + name + " matches " + found.Count + " players" };
+                return new RestObject("400")
+                {
+                    Error = $"Player {name} matches {found.Count} players"
+                };
             }
         }
 
