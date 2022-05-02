@@ -135,16 +135,16 @@ namespace PlayerReader
 
             var items = new
             {
-                inventory = player.TPlayer.inventory.Where(i => i.active).Select(item => (NetItem)item),
-                equipment = player.TPlayer.armor.Where(i => i.active).Select(item => (NetItem)item),
-                dyes = player.TPlayer.dye.Where(i => i.active).Select(item => (NetItem)item),
-                miscEquip = player.TPlayer.miscEquips.Where(i => i.active).Select(item => (NetItem)item),
-                miscDye = player.TPlayer.miscDyes.Where(i => i.active).Select(item => (NetItem)item),
-                piggy = player.TPlayer.bank.item.Where(i => i.active).Select(item => (NetItem)item),
-                safe = player.TPlayer.bank2.item.Where(i => i.active).Select(item => (NetItem)item),
+                inventory = player.TPlayer.inventory.Where(i => i.active).Cast<NetItem>(),
+                equipment = player.TPlayer.armor.Where(i => i.active).Cast<NetItem>(),
+                dyes = player.TPlayer.dye.Where(i => i.active).Cast<NetItem>(),
+                miscEquip = player.TPlayer.miscEquips.Where(i => i.active).Cast<NetItem>(),
+                miscDye = player.TPlayer.miscDyes.Where(i => i.active).Cast<NetItem>(),
+                piggy = player.TPlayer.bank.item.Where(i => i.active).Cast<NetItem>(),
+                safe = player.TPlayer.bank2.item.Where(i => i.active).Cast<NetItem>(),
                 trash = (NetItem)player.TPlayer.trashItem,
-                forge = player.TPlayer.bank3.item.Where(i => i.active).Select(item => (NetItem)item),
-                vault = player.TPlayer.bank4.item.Where(i => i.active).Select(item => (NetItem)item),
+                forge = player.TPlayer.bank3.item.Where(i => i.active).Cast<NetItem>(),
+                vault = player.TPlayer.bank4.item.Where(i => i.active).Cast<NetItem>(),
             };
 
             return new RestObject
