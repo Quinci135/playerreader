@@ -26,7 +26,6 @@ namespace PlayerReader
 
         public PlayerReader(Main game) : base(game)
         {
-
         }
 
         public override void Initialize()
@@ -42,16 +41,20 @@ namespace PlayerReader
             }
             base.Dispose(disposing);
         }
+
         private void OnInit(EventArgs e)
         {
             TShock.RestApi.RegisterRedirect("/readplayers", "/readplayers");
             TShock.RestApi.Register(new SecureRestCommand("/readplayers", PlayerRead, RestPermissions.restuserinfo));
         }
+
         private object PlayerFind(IParameterCollection parameters)
         {
             string name = parameters["player"];
             if (string.IsNullOrWhiteSpace(name))
+            {
                 return new RestObject("400") { Error = "Missing or empty 'player' parameter" };
+            }
 
             var found = TSPlayer.FindByNameOrID(name);
             if (found.Count == 1)
@@ -60,17 +63,15 @@ namespace PlayerReader
             }
             else if (found.Count == 0)
             {
-                
                 UserAccount account = TShock.UserAccounts.GetUserAccountByName(name);
                 if (account != null)
                 {
                     try
                     {
-
                         using (var reader = TShock.DB.QueryReader("SELECT * FROM sscinventory WHERE Account=@0", account.ID))
+                        {
                             if (reader.Read())
                             {
-
                                 List<NetItem> inventoryList = reader.Get<string>("Inventory").Split('~').Select(NetItem.Parse).ToList();
                                 object items = new
                                 {
@@ -78,21 +79,21 @@ namespace PlayerReader
                                 };
 
                                 return new RestObject
-                                    {
-                                        {"online" , "false"},
-                                        {"nickname", account.Name},
-                                        {"username", account.Name},
-                                        {"group", account.Group},
-                                        {"position", "Player is offline."},
-                                        {"items", items},
-                                    };
+                                {
+                                    {"online" , "false"},
+                                    {"nickname", account.Name},
+                                    {"username", account.Name},
+                                    {"group", account.Group},
+                                    {"position", "Player is offline."},
+                                    {"items", items},
+                                };
                             }
                             else
                             {
                                 return new RestObject("400") { Error = "DB could not be read." };
                             }
+                        }
                     }
-
                     catch (Exception ex)
                     {
                         TShock.Log.Error(ex.ToString());
@@ -108,7 +109,6 @@ namespace PlayerReader
             {
                 return new RestObject("400") { Error = "Player " + name + " matches " + found.Count + " players" };
             }
-
         }
 
         [Description("Get information for a user.")]
@@ -125,9 +125,8 @@ namespace PlayerReader
             }
 
             TSPlayer player = (TSPlayer)ret;
-            
 
-            object items = new
+            var items = new
             {
                 inventory = player.TPlayer.inventory.Where(i => i.active).Select(item => (NetItem)item),
                 equipment = player.TPlayer.armor.Where(i => i.active).Select(item => (NetItem)item),
