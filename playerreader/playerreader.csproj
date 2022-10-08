@@ -14,7 +14,7 @@
   <!-- NuGet References -->
   <ItemGroup>
     <PackageReference Include="MySql.Data" Version="8.0.30" />
-    <PackageReference Include="OTAPI.Upcoming" Version="3.1.8-alpha" />
+    <PackageReference Include="OTAPI.Upcoming" Version="3.1.9-alpha" />
   </ItemGroup>
 
   <!-- Local References -->
